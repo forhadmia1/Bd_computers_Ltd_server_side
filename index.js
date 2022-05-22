@@ -16,8 +16,17 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect()
-        const partsCollection = client.db("BD_Computers_LTD").collection("parts");
-        console.log('database connected')
+        const hardwareCollection = client.db("BD_Computers_LTD").collection("hardwares");
+
+        //get products
+        app.get('/hardwares', async (req, res) => {
+            const result = await hardwareCollection.find().toArray()
+            res.send(result)
+        })
+
+
+
+
 
     } finally {
 
@@ -29,7 +38,7 @@ run().catch(console.dir)
 
 
 app.get('/', (req, res) => {
-    res.send('Website is run')
+    res.send('BD_Computers_LTD Website is run')
 })
 app.listen(port, () => {
     console.log('listening port is', port)
