@@ -19,10 +19,21 @@ async function run() {
         await client.connect()
         const hardwareCollection = client.db("BD_Computers_LTD").collection("hardwares");
         const userCollection = client.db("BD_Computers_LTD").collection("users");
+        const reviewsCollection = client.db("BD_Computers_LTD").collection("reviews");
+        //verify jwt 
+        const verifyJwt = async (req, res, next) => {
 
+        }
         //get products
         app.get('/hardwares', async (req, res) => {
             const result = await hardwareCollection.find().toArray()
+            res.send(result)
+        })
+        //get single item
+        app.get('/hardware/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await hardwareCollection.findOne(query)
             res.send(result)
         })
         //add user and token issue
@@ -37,6 +48,13 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc, options)
             const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
             res.send({ result, token })
+        })
+        //add reviews
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.send(result)
+
         })
 
 
