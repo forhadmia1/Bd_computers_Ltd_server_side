@@ -29,6 +29,12 @@ async function run() {
             const result = await hardwareCollection.find().toArray()
             res.send(result)
         })
+        //add product
+        app.post('/hardwares', async (req, res) => {
+            const data = req.body;
+            const result = await hardwareCollection.insertOne(data)
+            res.send(result)
+        })
         //get single item
         app.get('/hardware/:id', async (req, res) => {
             const id = req.params.id;
