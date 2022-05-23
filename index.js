@@ -54,7 +54,34 @@ async function run() {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);
             res.send(result)
-
+        })
+        //get reviews
+        app.get('/reviews', async (req, res) => {
+            const result = await reviewsCollection.find().toArray();
+            res.send(result)
+        })
+        //get user profile
+        app.get('/profile', async (req, res) => {
+            const email = req.query.email;
+            const query = { email }
+            const result = await userCollection.findOne(query)
+            res.send(result)
+        })
+        //update user profile
+        app.put('/profile', async (req, res) => {
+            const email = req.query.email;
+            const userData = req.body;
+            const filter = { email }
+            const updateDoc = {
+                $set: userData
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
+        //get all users
+        app.get('/users', async (req, res) => {
+            const result = await userCollection.find().toArray()
+            res.send(result)
         })
 
 
