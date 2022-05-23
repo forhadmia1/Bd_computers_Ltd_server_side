@@ -83,6 +83,15 @@ async function run() {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
+        //check admin 
+        app.get('/admin', async (req, res) => {
+            const email = req.query.email;
+            const user = await userCollection.findOne({ email });
+            if (user.role === 'admin') {
+                return res.send({ isAdmin: true })
+            }
+            res.send({ isAdmin: false })
+        })
 
 
 
