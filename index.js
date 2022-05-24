@@ -20,6 +20,7 @@ async function run() {
         const hardwareCollection = client.db("BD_Computers_LTD").collection("hardwares");
         const userCollection = client.db("BD_Computers_LTD").collection("users");
         const reviewsCollection = client.db("BD_Computers_LTD").collection("reviews");
+        const ordersCollection = client.db("BD_Computers_LTD").collection("orders");
         //verify jwt 
         const verifyJwt = async (req, res, next) => {
 
@@ -97,6 +98,12 @@ async function run() {
                 return res.send({ isAdmin: true })
             }
             res.send({ isAdmin: false })
+        })
+        // add order 
+        app.post('/orders', async (req, res) => {
+            const orderDetails = req.body;
+            const result = await ordersCollection.insertOne(orderDetails)
+            res.send(result)
         })
 
 
