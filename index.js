@@ -33,6 +33,13 @@ async function run() {
             const result = await hardwareCollection.find().toArray()
             res.send(result)
         })
+        //delete product
+        app.delete('/hardwares/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await hardwareCollection.deleteOne(query)
+            res.send(result)
+        })
         //add product
         app.post('/hardwares', async (req, res) => {
             const data = req.body;
