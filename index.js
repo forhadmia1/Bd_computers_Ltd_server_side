@@ -26,22 +26,47 @@ async function run() {
         const paymentsCollection = client.db("BD_Computers_LTD").collection("payments");
         //verify jwt 
         const verifyJwt = async (req, res, next) => {
-
+            const authorization = req.headers.authorization;
+            if (!authorization) {
+                return res.status(401).send({ message: 'Unauthorized access' })
+            }
+            const token = authorization.split(' ')[1]
+            const result = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+                if (err) {
+                    return res.status(403).send({ message: 'Forbidden Access' })
+                }
+                req.decoded = decoded.email;
+                next()
+            });
         }
+
+        //verify admin route
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.decoded;
+            const user = await userCollection.findOne({ email })
+            if (user.role === "admin") {
+                next()
+            } else {
+                return res.status(403).send({ message: 'Forbidden' })
+            }
+        }
+
         //get products
         app.get('/hardwares', async (req, res) => {
             const result = await hardwareCollection.find().toArray()
             res.send(result)
         })
+
         //delete product
-        app.delete('/hardwares/:id', async (req, res) => {
+        app.delete('/hardwares/:id', verifyJwt, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await hardwareCollection.deleteOne(query)
             res.send(result)
         })
+
         //add product
-        app.post('/hardwares', async (req, res) => {
+        app.post('/hardwares', verifyJwt, verifyAdmin, async (req, res) => {
             const data = req.body;
             const result = await hardwareCollection.insertOne(data)
             res.send(result)
@@ -67,7 +92,7 @@ async function run() {
             res.send({ result, token })
         })
         //add reviews
-        app.post('/reviews', async (req, res) => {
+        app.post('/reviews', verifyJwt, async (req, res) => {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);
             res.send(result)
@@ -78,14 +103,14 @@ async function run() {
             res.send(result)
         })
         //get user profile
-        app.get('/profile', async (req, res) => {
+        app.get('/profile', verifyJwt, async (req, res) => {
             const email = req.query.email;
             const query = { email }
             const result = await userCollection.findOne(query)
             res.send(result)
         })
         //update user profile
-        app.put('/profile', async (req, res) => {
+        app.put('/profile', verifyJwt, async (req, res) => {
             const email = req.query.email;
             const userData = req.body;
             const filter = { email }
@@ -96,7 +121,7 @@ async function run() {
             res.send(result)
         })
         //get all users
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyJwt, verifyAdmin, async (req, res) => {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
@@ -110,17 +135,20 @@ async function run() {
             res.send({ isAdmin: false })
         })
         // add order 
-        app.post('/orders', async (req, res) => {
+        app.post('/orders', verifyJwt, async (req, res) => {
             const orderDetails = req.body;
             const result = await ordersCollection.insertOne(orderDetails)
             res.send(result)
         })
         //get order by email
-        app.get('/orders/:email', async (req, res) => {
+        app.get('/orders/:email', verifyJwt, async (req, res) => {
+            const decodeEmail = req.decoded;
             const email = req.params.email;
-            const query = { email }
-            const result = await ordersCollection.find(query).toArray()
-            res.send(result)
+            if (decodeEmail === email) {
+                const query = { email }
+                const result = await ordersCollection.find(query).toArray()
+                res.send(result)
+            }
         })
         //delete order
         app.delete('/orders/:id', async (req, res) => {
@@ -167,10 +195,11 @@ async function run() {
             });
         });
         //get all order for admin
-        app.get('/orders', async (req, res) => {
+        app.get('/orders', verifyJwt, verifyAdmin, async (req, res) => {
             const result = await ordersCollection.find().toArray()
             res.send(result)
         })
+
         //update order to shiped
         app.put('/placedOrder/:id', async (req, res) => {
             const id = req.params.id;
@@ -188,7 +217,7 @@ async function run() {
 
 
     } finally {
-
+        // client.close()
     }
 }
 run().catch(console.dir)
