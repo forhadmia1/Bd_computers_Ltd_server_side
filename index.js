@@ -108,7 +108,7 @@ async function run() {
             const result = await ordersCollection.insertOne(orderDetails)
             res.send(result)
         })
-        //get order
+        //get order by email
         app.get('/orders/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
@@ -159,6 +159,23 @@ async function run() {
                 clientSecret: paymentIntent.client_secret,
             });
         });
+        //get all order for admin
+        app.get('/orders', async (req, res) => {
+            const result = await ordersCollection.find().toArray()
+            res.send(result)
+        })
+        //update order to shiped
+        app.put('/placedOrder/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    orderStatus: 'shipped'
+                }
+            }
+            const result = await ordersCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
 
 
