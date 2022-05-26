@@ -216,13 +216,12 @@ async function run() {
         //add suscriber to database
         app.post('/subscribe', async (req, res) => {
             const data = req.body;
-            console.log(data)
             const exist = await subscribersCollection.findOne(data)
             if (exist) {
-                return res.send({ exist: true })
+                return res.send({ exists: true })
             } else {
                 const result = await subscribersCollection.insertOne(data)
-                return res.send({ result, exist: flse })
+                return res.send({ result, exists: flse })
             }
         })
 
