@@ -24,6 +24,7 @@ async function run() {
         const reviewsCollection = client.db("BD_Computers_LTD").collection("reviews");
         const ordersCollection = client.db("BD_Computers_LTD").collection("orders");
         const paymentsCollection = client.db("BD_Computers_LTD").collection("payments");
+        const subscribersCollection = client.db("BD_Computers_LTD").collection("subscribers");
         //verify jwt 
         const verifyJwt = async (req, res, next) => {
             const authorization = req.headers.authorization;
@@ -212,17 +213,24 @@ async function run() {
             const result = await ordersCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
-
-
-
+        //add suscriber to database
+        app.post('/subscribe', async (req, res) => {
+            const data = req.body;
+            console.log(data)
+            const exist = await subscribersCollection.findOne(data)
+            if (exist) {
+                return res.send({ exist: true })
+            } else {
+                const result = await subscribersCollection.insertOne(data)
+                return res.send({ result, exist: flse })
+            }
+        })
 
     } finally {
         // client.close()
     }
 }
 run().catch(console.dir)
-
-
 
 
 app.get('/', (req, res) => {
