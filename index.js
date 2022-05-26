@@ -177,7 +177,7 @@ async function run() {
                 }
             }
             const result = await ordersCollection.updateOne(filter, updateDoc)
-            const payment = paymentsCollection.insertOne(paymentDetails)
+            const payment = await paymentsCollection.insertOne(paymentDetails)
             res.send(updateDoc)
         })
         //payment api
